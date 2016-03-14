@@ -1,8 +1,6 @@
 import tape from 'tape';
 import tapePromise from 'tape-promise'
-import Client from '../src/Client';
-import Application from '../src/Server/Application';
-import Router from '../src/Server/Router';
+import { Client, Application, Router } from '../es5';
 import { Server as WebSocketServer } from 'ws';
 
 const test = tapePromise(tape);
