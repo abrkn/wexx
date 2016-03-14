@@ -41,14 +41,14 @@ export default class Client extends EventEmitter {
       };
 
       const removeListeners = () => {
-        ws.removeListener('open', onOpen);
-        ws.removeListener('close', onClose);
-        ws.removeListener('error', onError);
+        ws.onopen = null;
+        ws.onerror = null;
+        ws.onclose = null;
       };
 
-      ws.on('open', onOpen);
-      ws.on('close', onClose);
-      ws.on('error', onError);
+      ws.onopen = onOpen;
+      ws.onerror = onError;
+      ws.onclose = onClose;
     });
   }
 
