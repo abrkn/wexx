@@ -1,3 +1,5 @@
 # Wexx
 
-JSON RPC over WebSokets
+[![Build Status](https://travis-ci.org/abrkn/wexx.svg?branch=master)](https://travis-ci.org/abrkn/wexx)
+
+JSON RPC over WebSockets
