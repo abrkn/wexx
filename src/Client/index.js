@@ -16,8 +16,8 @@ export default class Client extends EventEmitter {
     assert(socket);
     super();
     this.socket = socket;
-    this.socket.on('message', this.onSocketMessage);
-    this.socket.on('close', this.onSocketClose);
+    this.onmessage = this.onSocketMessage;
+    this.onclose this.onSocketClose;
   }
 
   static async connect(endpoint, options = {}) {
