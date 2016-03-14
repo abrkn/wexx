@@ -21,11 +21,13 @@
     "bluebird": "3.1.1",
     "composition": "2.2.1",
     "debug": "2.2.0",
-    "eslint-config-airbnb": "6.1.0",
     "ws": "1.0.1"
   },
   "devDependencies": {
     "babel-tape-runner": "2.0.1",
+    "eslint": "2.4.0",
+    "eslint-config-airbnb": "6.1.0",
+    "eslint-plugin-react": "4.2.1",
     "tape": "4.5.1",
     "tape-promise": "1.0.1"
   }
