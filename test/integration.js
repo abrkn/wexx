@@ -20,7 +20,7 @@ test('calculator service', async (t) => {
   server.on('connection', app.accept.bind(app));
 
   // Calculator client
-  const client = await Client.connect(`http://localhost:${port}`);
+  const client = await Client.connect(`ws://localhost:${port}/api`);
   const actual = await client.request('sum', [1, 2, 3]);
   t.equal(actual, 6);
 

@@ -16,26 +16,32 @@ export default class Client extends EventEmitter {
     assert(socket);
     super();
     this.socket = socket;
-    this.onmessage = this.onSocketMessage;
-    this.onclose = this.onSocketClose;
+    this.socket.onmessage = this.onSocketMessage;
+    this.socket.onclose = this.onSocketClose;
+    // this.socket.onerror = this.onSocketError;
   }
 
   static async connect(endpoint, options = {}) {
     return await new Promise((resolve, reject) => {
+      debug(`connecting to ${endpoint}...`);
+
       const ws = new WebSocket(endpoint, options.ws);
 
       const onOpen = () => {
+        debug('connected!');
         removeListeners();
         const client = new Client(ws);
         resolve(client);
       };
 
       const onClose = () => {
+        debug('closed before connected');
         reject();
         removeListeners();
       };
 
       const onError = (error) => {
+        debug(`connect failed: ${error.message}`);
         reject(error);
         removeListeners();
       };
@@ -53,6 +59,8 @@ export default class Client extends EventEmitter {
   }
 
   onSocketClose = () => {
+    debug('closed');
+
     this.emit('close');
     this.socket = null;
 
@@ -61,7 +69,7 @@ export default class Client extends EventEmitter {
     this.requests = {};
   };
 
-  onSocketMessage = (raw) => {
+  onSocketMessage = ({ data: raw }) => {
     debug(`<-- ${raw}`);
 
     const message = JSON.parse(raw);

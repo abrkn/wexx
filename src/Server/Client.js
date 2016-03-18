@@ -25,7 +25,6 @@ export default class Client extends EventEmitter {
     const message = JSON.parse(raw); // TODO: Error check
     debug(`<-- ${inspect(message)}`);
 
-
     // TODO: Validate message fields
 
     assert(message.params, 'params missing');
