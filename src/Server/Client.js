@@ -15,6 +15,14 @@ export default class Client extends EventEmitter {
     this.socket.on('error', this.onSocketError);
   }
 
+  notify(method, params) {
+    this.send({
+      id: null,
+      method,
+      params,
+    });
+  }
+
   send(message) {
     debug(`--> ${inspect(message)}`);
     this.socket.send(JSON.stringify(message));
