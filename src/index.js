@@ -1,4 +1,6 @@
-require('babel-polyfill');
+if (typeof regeneratorRuntime === 'undefined') {
+	require('babel-polyfill');
+}
 
 export const Client = require('./Client').default;
 export const Application = require('./Server/Application').default;
