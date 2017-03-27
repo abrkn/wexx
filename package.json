@@ -6,7 +6,7 @@
   "scripts": {
     "transpile": "node_modules/.bin/babel src --out-dir es5",
     "install": "npm run transpile",
-    "prepublish": "npm run transpile",
+    "prepublishOnly": "npm run transpile",
     "test": "DEBUG=*,-babel babel-tape-runner test/*"
   },
   "keywords": [],
