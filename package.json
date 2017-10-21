@@ -17,9 +17,6 @@
     "ws": "1.0.1"
   },
   "devDependencies": {
-    "eslint": "2.4.0",
-    "eslint-config-airbnb": "6.1.0",
-    "eslint-plugin-react": "4.2.1",
     "tape": "4.5.1",
     "tape-promise": "1.0.1"
   }
