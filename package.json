@@ -2,7 +2,7 @@
   "name": "wexx",
   "version": "1.2.4",
   "description": "",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "DEBUG=*,-babel tape 'test/*'"
   },
