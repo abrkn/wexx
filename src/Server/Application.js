@@ -1,23 +1,29 @@
-import { EventEmitter } from 'events';
-import createDebugger from 'debug';
-import compose from 'composition';
-import async from 'async';
-import assert from 'assert';
-import Client from './Client';
-import Context from './Context';
-import { inspect } from 'util';
+const { EventEmitter } = require('events');
+const createDebugger = require('debug');
+const compose = require('composition');
+const async = require('async');
+const assert = require('assert');
+const Client = require('./Client');
+const Context = require('./Context');
+const { inspect } = require('util');
 
 const debug = createDebugger('wex:server');
 
-export default class App extends EventEmitter {
-  middleware = [];
-  clients = [];
+class Application extends EventEmitter {
+  constructor() {
+    super();
+    this.middleware = [];
+    this.clients = [];
+    this.use = this.middleware.push.bind(this.middleware);
+    this.clientCounter = 0;
+  }
 
   handler(context) {
     const composed = compose([this.respond, ...this.middleware]);
 
-    composed.call(context)
-      .then(null, (error) => {
+    composed
+      .call(context)
+      .then(null, error => {
         debug(`error from middleware:\n${error.stack}`);
         assert(context.respond !== false);
         assert(context.result === undefined);
@@ -25,7 +31,7 @@ export default class App extends EventEmitter {
         context.error = 'Internal error';
         this.respondWithError.call(context);
       })
-      .catch((error) => {
+      .catch(error => {
         debug(`error in error handler:\n${error.stack}`);
       });
   }
@@ -68,9 +74,7 @@ export default class App extends EventEmitter {
     });
   }
 
-  use = this.middleware.push.bind(this.middleware);
-
-  onClientMessage = (client, message) => {
+  onClientMessage(client, message) {
     const context = new Context({
       client,
       message,
@@ -78,27 +82,27 @@ export default class App extends EventEmitter {
     });
 
     this.handler(context);
-  };
+  }
 
-  onClientClose = (client) => {
+  onClientClose(client) {
     debug(`removing closed client from clients list`);
     const removed = !!this.clients.splice(this.clients.indexOf(client), 1);
     assert(removed, 'failed to remove closed client');
-  };
+  }
 
   notifyAll(method, params = {}) {
     const message = { method, params };
-    debug(`notifying all: ${inspect(message)} (${this.clients.length} clients)`);
+    debug(
+      `notifying all: ${inspect(message)} (${this.clients.length} clients)`
+    );
 
-    this.clients.forEach((client) => {
+    this.clients.forEach(client => {
       client.send(message);
     });
   }
 
-  clientCounter = 0;
-
   // TODO: Extract into a listener
-  accept = (socket) => {
+  accept(socket) {
     debug('accepting client');
 
     const client = new Client(socket);
@@ -106,5 +110,7 @@ export default class App extends EventEmitter {
     this.clients.push(client);
     client.on('message', this.onClientMessage.bind(this, client));
     client.on('close', this.onClientClose.bind(this, client));
-  };
+  }
 }
+
+module.exports = Application;

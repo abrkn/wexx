@@ -1,6 +1,6 @@
-import Client from './index';
-import { EventEmitter } from 'events';
-import createDebugger from 'debug';
+const Client = require('./index');
+const { EventEmitter } = require('events');
+const createDebugger = require('debug');
 
 const STATES = {
   WAITING: 'WAITING',
@@ -11,12 +11,13 @@ const STATES = {
 
 const debug = createDebugger('wex:RetryClient');
 
-export default class RetryClient extends EventEmitter {
+class RetryClient extends EventEmitter {
   constructor(endpoint, options = {}) {
     super();
     this.options = options;
     this.state = STATES.CLOSED;
     this.endpoint = endpoint;
+    this.onClientClose = this.onClientClose.bind(this);
     this.connect();
   }
 
@@ -30,24 +31,23 @@ export default class RetryClient extends EventEmitter {
     this.state = STATES.CONNECTING;
 
     Client.connect(this.endpoint, this.options)
-      .then((client) => {
+      .then(client => {
         debug('open!');
 
         this.state = STATES.OPEN;
 
         client.on('close', this.onClientClose);
 
-        const proxyEvents = [
-          'notification',
-          'errorNotification',
-        ];
+        const proxyEvents = ['notification', 'errorNotification'];
 
-        proxyEvents.forEach((event) => client.on(event, this.emit.bind(this, event)));
+        proxyEvents.forEach(event =>
+          client.on(event, this.emit.bind(this, event))
+        );
 
         this.client = client;
         this.emit('open');
       })
-      .catch((error) => {
+      .catch(error => {
         debug(`failed to connect: ${error.message}`);
         this.emit('connectError', error);
         this.state = 'CLOSED';
@@ -72,7 +72,7 @@ export default class RetryClient extends EventEmitter {
     }, interval);
   }
 
-  onClientClose = (error) => {
+  onClientClose(error) {
     if (error) {
       debug(`connection closed with error: ${error.message}`);
       this.emit('close', error);
@@ -81,7 +81,7 @@ export default class RetryClient extends EventEmitter {
     }
     this.state = 'CLOSED';
     this.retry();
-  };
+  }
 
   async request(...rest) {
     if (this.state !== 'OPEN') {
@@ -90,3 +90,5 @@ export default class RetryClient extends EventEmitter {
     return await this.client.request.call(this.client, ...rest);
   }
 }
+
+module.exports = RetryClient;

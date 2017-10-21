@@ -1,11 +1,11 @@
-import tape from 'tape';
-import tapePromise from 'tape-promise'
-import { Client, Application, Router } from '../es5';
-import { Server as WebSocketServer } from 'ws';
+const tape = require('tape');
+const tapePromise = require('tape-promise');
+const { Client, Application, Router } = require('../src');
+const { Server: WebSocketServer } = require('ws');
 
 const test = tapePromise(tape);
 
-test('calculator service', async (t) => {
+test('calculator service', async t => {
   const port = 41782;
 
   // Calculator server

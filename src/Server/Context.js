@@ -1,9 +1,9 @@
-import { EventEmitter } from 'events';
-import createDebugger from 'debug';
+const { EventEmitter } = require('events');
+const createDebugger = require('debug');
 
 const debug = createDebugger('wex:server');
 
-export default class Context extends EventEmitter {
+class Context extends EventEmitter {
   constructor({ application, client, message }) {
     super();
     this.time = new Date();
@@ -13,3 +13,5 @@ export default class Context extends EventEmitter {
     this.client = client;
   }
 }
+
+module.exports = Context;

@@ -1,18 +1,18 @@
-import { EventEmitter } from 'events';
-import createDebugger from 'debug';
-import assert from 'assert';
-import { inspect } from 'util';
+const { EventEmitter } = require('events');
+const createDebugger = require('debug');
+const assert = require('assert');
+const { inspect } = require('util');
 
 const debug = createDebugger('wex:server');
 
-export default class Client extends EventEmitter {
+class Client extends EventEmitter {
   constructor(socket) {
     super();
 
     this.socket = socket;
-    this.socket.on('close', this.onSocketClose);
-    this.socket.on('message', this.onSocketMessage);
-    this.socket.on('error', this.onSocketError);
+    this.socket.on('close', this.onSocketClose.bind(this));
+    this.socket.on('message', this.onSocketMessage.bind(this));
+    this.socket.on('error', this.onSocketError.bind(this));
   }
 
   notify(method, params) {
@@ -28,7 +28,7 @@ export default class Client extends EventEmitter {
     this.socket.send(JSON.stringify(message));
   }
 
-  onSocketMessage = (raw) => {
+  onSocketMessage(raw) {
     // TODO: Flags?
     const message = JSON.parse(raw); // TODO: Error check
     debug(`<-- ${inspect(message)}`);
@@ -39,14 +39,15 @@ export default class Client extends EventEmitter {
     assert(message.method, 'method missing');
 
     this.emit('message', message);
-  };
+  }
 
-  onSocketClose = () => {
+  onSocketClose() {
     debug('close');
     this.emit('close');
-  };
+  }
 
-  onSocketError = (error) => {
+  onSocketError(error) {
     debug('wut error', error);
-  };
+  }
 }
+module.exports = Client;

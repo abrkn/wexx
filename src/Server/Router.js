@@ -1,37 +1,37 @@
-import compose from 'composition';
-import createDebugger from 'debug';
+const compose = require('composition');
+const createDebugger = require('debug');
 
 const debug = createDebugger('wex:server');
 
 class Router {
-    constructor() {
-      this.methods = {};
-    }
+  constructor() {
+    this.methods = {};
+  }
 
-    add(method, ...fn) {
-      this.methods[method] = compose(fn);
-      return this;
-    }
+  add(method, ...fn) {
+    this.methods[method] = compose(fn);
+    return this;
+  }
 
-    routes() {
-      const router = this;
+  routes() {
+    const router = this;
 
-      return function dispatch(next) {
-        const { method } = this.message;
-        const route = router.methods[method];
+    return function dispatch(next) {
+      const { method } = this.message;
+      const route = router.methods[method];
 
-        debug('routing %s', method);
+      debug('routing %s', method);
 
-        if (!route) {
-          debug('no handler found for %s', method);
-          return next;
-        }
+      if (!route) {
+        debug('no handler found for %s', method);
+        return next;
+      }
 
-        debug('handler found for %s', method);
+      debug('handler found for %s', method);
 
-        return route.call(this);
-      };
-    }
+      return route.call(this);
+    };
+  }
 }
 
-export default Router;
+module.exports = Router;
