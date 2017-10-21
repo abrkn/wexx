@@ -1,7 +1,7 @@
 const compose = require('composition');
 const createDebugger = require('debug');
 
-const debug = createDebugger('wex:server');
+const debug = createDebugger('wexx:server');
 
 class Router {
   constructor() {

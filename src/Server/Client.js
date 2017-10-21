@@ -3,7 +3,7 @@ const createDebugger = require('debug');
 const assert = require('assert');
 const { inspect } = require('util');
 
-const debug = createDebugger('wex:server');
+const debug = createDebugger('wexx:server');
 
 class Client extends EventEmitter {
   constructor(socket) {

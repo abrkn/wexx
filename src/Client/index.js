@@ -6,7 +6,7 @@ const createDebugger = require('debug');
 const isBrowser = typeof window !== 'undefined';
 const WebSocket = isBrowser ? window.WebSocket : require('ws');
 
-const debug = createDebugger('wex:client');
+const debug = createDebugger('wexx:client');
 
 class Client extends EventEmitter {
   constructor(socket) {

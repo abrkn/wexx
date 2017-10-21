@@ -1,7 +1,7 @@
 const { EventEmitter } = require('events');
 const createDebugger = require('debug');
 
-const debug = createDebugger('wex:server');
+const debug = createDebugger('wexx:server');
 
 class Context extends EventEmitter {
   constructor({ application, client, message }) {

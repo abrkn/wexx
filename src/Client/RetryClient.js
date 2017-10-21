@@ -9,7 +9,7 @@ const STATES = {
   CLOSED: 'CLOSED',
 };
 
-const debug = createDebugger('wex:RetryClient');
+const debug = createDebugger('wexx:RetryClient');
 
 class RetryClient extends EventEmitter {
   constructor(endpoint, options = {}) {
