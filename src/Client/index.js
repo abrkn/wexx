@@ -2,9 +2,7 @@ const Promise = require('bluebird');
 const assert = require('assert');
 const { EventEmitter } = require('events');
 const createDebugger = require('debug');
-
-const isBrowser = typeof window !== 'undefined';
-const WebSocket = isBrowser ? window.WebSocket : require('ws');
+const WebSocket = require('universal-websocket-client');
 
 const debug = createDebugger('wexx:client');
 
