@@ -110,6 +110,8 @@ class Application extends EventEmitter {
     this.clients.push(client);
     client.on('message', this.onClientMessage.bind(this, client));
     client.on('close', this.onClientClose.bind(this, client));
+
+    return client;
   }
 }
 
