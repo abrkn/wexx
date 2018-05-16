@@ -92,9 +92,7 @@ class Application extends EventEmitter {
 
   notifyAll(method, params = {}) {
     const message = { method, params };
-    debug(
-      `notifying all: ${inspect(message)} (${this.clients.length} clients)`
-    );
+    debug(`notifying all: ${inspect(message)} (${this.clients.length} clients)`);
 
     this.clients.forEach(client => {
       client.send(message);
