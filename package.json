@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "DEBUG=*,-babel tape 'test/*'",
-    "build": "[ -d .git ] || babel src -d src --ignore node_modules"
+    "install": "[ -d .git ] || babel src -d src --ignore node_modules"
   },
   "keywords": [],
   "author": "",
@@ -27,12 +27,7 @@
     "tape-promise": "1.0.1"
   },
   "babel": {
-    "presets": [
-      "es2015",
-      "stage-0"
-    ],
-    "plugins": [
-      "transform-object-rest-spread"
-    ]
+    "presets": ["es2015", "stage-0"],
+    "plugins": ["transform-object-rest-spread"]
   }
 }
