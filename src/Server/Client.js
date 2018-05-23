@@ -2,6 +2,7 @@ const { EventEmitter } = require('events');
 const createDebugger = require('debug');
 const assert = require('assert');
 const { inspect } = require('util');
+const { has, isPlainObject } = require('lodash');
 
 const debug = createDebugger('wexx:server');
 
@@ -29,25 +30,63 @@ class Client extends EventEmitter {
   }
 
   onSocketMessage(raw) {
-    // TODO: Flags?
-    const message = JSON.parse(raw); // TODO: Error check
+    let message;
+
+    try {
+      message = JSON.parse(raw);
+    } catch (error) {
+      this.send({
+        method: 'error',
+        id: null,
+        params: {
+          code: -32700,
+          message: 'Parse error',
+        },
+      });
+
+      return;
+    }
+
+    if (!message.method) {
+      this.send({
+        method: 'error',
+        id: null,
+        params: {
+          code: -32600,
+          message: 'method missing',
+        },
+      });
+
+      return;
+    }
+
+    if (has(message, 'params') && typeof message.params !== 'object') {
+      this.send({
+        method: 'error',
+        id: null,
+        params: {
+          code: -32600,
+          message: 'params must be object',
+        },
+      });
+
+      return;
+    }
+
     debug(`<-- ${inspect(message)}`);
-
-    // TODO: Validate message fields
-
-    assert(message.params, 'params missing');
-    assert(message.method, 'method missing');
 
     this.emit('message', message);
   }
 
-  onSocketClose() {
-    debug('close');
-    this.emit('close');
+  onSocketClose(...args) {
+    debug('close', ...args);
+    this.emit('close', ...args);
   }
 
   onSocketError(error) {
-    debug('wut error', error);
+    console.error(`SOCKET ERROR: ${error.message}`);
+    throw error;
   }
 }
+
 module.exports = Client;

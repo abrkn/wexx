@@ -37,8 +37,7 @@ class Client extends EventEmitter {
     const { id, result, error } = message;
 
     if (!id) {
-      this.emit('notification', message);
-      // this.emit('errorNotification', message);
+      this.emit('notify', message);
       return;
     }
 
@@ -68,31 +67,47 @@ class Client extends EventEmitter {
     reject(wrappedError);
   }
 
-  async request(method, first, ...rest) {
+  send(message) {
+    assert(message);
     assert(this.socket, 'disposed');
 
-    let params;
-    if (first === undefined) {
-      params = [];
-    } else if (rest.length) {
-      params = [first, ...rest];
-    } else {
-      params = first;
-    }
-
-    const id = ++this.requestCounter;
-    const raw = JSON.stringify({
-      id,
-      method,
-      params,
-    });
+    const raw = JSON.stringify(message);
 
     debug(`--> ${raw}`);
     this.socket.send(raw);
+  }
+
+  async request(method, params) {
+    const id = ++this.requestCounter;
+
+    const message = {
+      id,
+      method,
+    };
+
+    if (params) {
+      message.params = params;
+    }
+
+    this.send(message);
 
     return new Promise((resolve, reject) => {
       this.requests[id] = { resolve, reject };
     });
+  }
+
+  notify(method, params) {
+    assert(method);
+
+    const message = {
+      method,
+    };
+
+    if (params) {
+      message.params = params;
+    }
+
+    this.send(message);
   }
 
   close() {

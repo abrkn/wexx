@@ -6,6 +6,8 @@ const assert = require('assert');
 const Client = require('./Client');
 const Context = require('./Context');
 const { inspect } = require('util');
+const JsonRpcError = require('../JsonRpcError');
+const { pick } = require('lodash');
 
 const debug = createDebugger('wexx:server');
 
@@ -19,6 +21,8 @@ class Application extends EventEmitter {
   }
 
   handler(context) {
+    console.log('running handler with %s', this.middleware.length);
+
     const composed = compose([this.respond, ...this.middleware]);
 
     composed
@@ -28,7 +32,15 @@ class Application extends EventEmitter {
         assert(context.respond !== false);
         assert(context.result === undefined);
         assert(context.error === undefined);
-        context.error = 'Internal error';
+
+        if (!(error instanceof JsonRpcError)) {
+          error = new JsonRpcError('Internal server error', {
+            code: 'InternalServerError',
+          });
+        }
+
+        context.error = pick(error, 'message', 'code', 'data');
+
         this.respondWithError.call(context);
       })
       .catch(error => {
@@ -84,7 +96,7 @@ class Application extends EventEmitter {
     this.handler(context);
   }
 
-  onClientClose(client) {
+  onClientClose(client, ...rest) {
     debug(`removing closed client from clients list`);
     const removed = !!this.clients.splice(this.clients.indexOf(client), 1);
     assert(removed, 'failed to remove closed client');
@@ -92,7 +104,9 @@ class Application extends EventEmitter {
 
   notifyAll(method, params = {}) {
     const message = { method, params };
-    debug(`notifying all: ${inspect(message)} (${this.clients.length} clients)`);
+    debug(
+      `notifying all: ${inspect(message)} (${this.clients.length} clients)`
+    );
 
     this.clients.forEach(client => {
       client.send(message);
@@ -108,6 +122,8 @@ class Application extends EventEmitter {
     this.clients.push(client);
     client.on('message', this.onClientMessage.bind(this, client));
     client.on('close', this.onClientClose.bind(this, client));
+
+    this.emit('accept', client);
 
     return client;
   }

@@ -38,7 +38,7 @@ class RetryClient extends EventEmitter {
 
         client.on('close', this.onClientClose);
 
-        const proxyEvents = ['notification', 'errorNotification'];
+        const proxyEvents = ['notify'];
 
         proxyEvents.forEach(event =>
           client.on(event, this.emit.bind(this, event))
@@ -87,7 +87,16 @@ class RetryClient extends EventEmitter {
     if (this.state !== 'OPEN') {
       throw new Error('Not connected');
     }
+
     return await this.client.request.call(this.client, ...rest);
+  }
+
+  async notify(...rest) {
+    if (this.state !== 'OPEN') {
+      throw new Error('Not connected');
+    }
+
+    return await this.client.notify.call(this.client, ...rest);
   }
 }
 
