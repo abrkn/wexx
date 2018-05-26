@@ -21,8 +21,6 @@ class Application extends EventEmitter {
   }
 
   handler(context) {
-    console.log('running handler with %s', this.middleware.length);
-
     const composed = compose([this.respond, ...this.middleware]);
 
     composed
@@ -34,9 +32,15 @@ class Application extends EventEmitter {
         assert(context.error === undefined);
 
         if (!(error instanceof JsonRpcError)) {
-          error = new JsonRpcError('Internal server error', {
-            code: 'InternalServerError',
-          });
+          if (process.env.NODE_ENV === 'production') {
+            error = new JsonRpcError('Internal server error', {
+              code: 'InternalServerError',
+            });
+          } else {
+            error = new JsonRpcError(error.message, {
+              code: 'InternalServerError',
+            });
+          }
         }
 
         context.error = pick(error, 'message', 'code', 'data');
