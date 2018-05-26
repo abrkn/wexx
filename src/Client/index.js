@@ -13,9 +13,14 @@ class Client extends EventEmitter {
     this.socket = socket;
     this.socket.onmessage = this.onSocketMessage.bind(this);
     this.socket.onclose = this.onSocketClose.bind(this);
-    // this.socket.onerror = this.onSocketError.bind(this);
+    this.socket.onerror = this.onSocketError.bind(this);
+    this.socket.onopen = this.onSocketOpen.bind(this);
     this.requestCounter = 0;
     this.requests = {};
+  }
+
+  onSocketOpen() {
+    this.emit('open');
   }
 
   onSocketClose() {
@@ -25,6 +30,15 @@ class Client extends EventEmitter {
     this.socket = null;
 
     const error = new Error('Connection closed during request');
+    Object.keys(this.requests).forEach(id => this.requests[id].reject(error));
+    this.requests = {};
+  }
+
+  onSocketError() {
+    this.emit('error');
+    this.socket = null;
+
+    const error = new Error('Connection error during request');
     Object.keys(this.requests).forEach(id => this.requests[id].reject(error));
     this.requests = {};
   }
@@ -67,14 +81,16 @@ class Client extends EventEmitter {
     reject(wrappedError);
   }
 
-  send(message) {
+  async send(message) {
     assert(message);
     assert(this.socket, 'disposed');
 
     const raw = JSON.stringify(message);
 
     debug(`--> ${raw}`);
-    this.socket.send(raw);
+
+    // TODO: Await
+    await this.socket.send(raw);
   }
 
   async request(method, params) {
@@ -89,14 +105,14 @@ class Client extends EventEmitter {
       message.params = params;
     }
 
-    this.send(message);
+    await this.send(message);
 
     return new Promise((resolve, reject) => {
       this.requests[id] = { resolve, reject };
     });
   }
 
-  notify(method, params) {
+  async notify(method, params) {
     assert(method);
 
     const message = {
@@ -107,7 +123,7 @@ class Client extends EventEmitter {
       message.params = params;
     }
 
-    this.send(message);
+    await this.send(message);
   }
 
   close() {

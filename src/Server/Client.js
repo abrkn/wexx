@@ -4,6 +4,8 @@ const assert = require('assert');
 const { inspect } = require('util');
 const { has, isPlainObject } = require('lodash');
 
+const MAX_INSPECT_LENGTH = 250;
+
 const debug = createDebugger('wexx:server');
 
 class Client extends EventEmitter {
@@ -16,16 +18,18 @@ class Client extends EventEmitter {
     this.socket.on('error', this.onSocketError.bind(this));
   }
 
-  notify(method, params) {
-    this.send({
+  async notify(method, params) {
+    await this.send({
       id: null,
       method,
       params,
     });
   }
 
-  send(message) {
-    debug(`--> ${inspect(message)}`);
+  async send(message) {
+    debug(`--> ${inspect(message).substr(0, MAX_INSPECT_LENGTH)}`);
+
+    // TODO: Wait for callback
     this.socket.send(JSON.stringify(message));
   }
 
@@ -73,7 +77,7 @@ class Client extends EventEmitter {
       return;
     }
 
-    debug(`<-- ${inspect(message)}`);
+    debug(`<-- ${inspect(message).substr(0, MAX_INSPECT_LENGTH)}`);
 
     this.emit('message', message);
   }
