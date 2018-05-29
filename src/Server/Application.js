@@ -25,7 +25,7 @@ class Application extends EventEmitter {
 
     composed
       .call(context)
-      .then(null, error => {
+      .then(null, async error => {
         debug(`error from middleware:\n${error.stack}`);
         assert(context.respond !== false);
         assert(context.result === undefined);
@@ -45,14 +45,14 @@ class Application extends EventEmitter {
 
         context.error = pick(error, 'message', 'code', 'data');
 
-        this.respondWithError.call(context);
+        await this.respondWithError.call(context);
       })
       .catch(error => {
         debug(`error in error handler:\n${error.stack}`);
       });
   }
 
-  respondWithError() {
+  async respondWithError() {
     let { error } = this;
     assert(error, 'error missing');
 
@@ -60,7 +60,7 @@ class Application extends EventEmitter {
       error = { message: error };
     }
 
-    this.client.send({
+    await this.client.send({
       id: this.message.id,
       error,
     });
@@ -80,11 +80,11 @@ class Application extends EventEmitter {
     }
 
     if (this.error) {
-      this.application.respondWithError.call(this);
+      yield this.application.respondWithError.call(this);
       return;
     }
 
-    this.client.send({
+    yield this.client.send({
       id: this.message.id,
       result,
     });
