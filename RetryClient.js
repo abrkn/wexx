@@ -1,6 +1,6 @@
 try {
   require('babel-core/register');
   require('babel-polyfill');
-} catch (error) { }
+} catch (error) {}
 
-module.exports = require('./src/Client/RetryClient');
+module.exports = require('./src/RetryClient');

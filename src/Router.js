@@ -1,7 +1,7 @@
 const compose = require('composition');
 const createDebugger = require('debug');
 
-const debug = createDebugger('wexx:server:router');
+const debug = createDebugger('wexx:Router');
 
 class Router {
   constructor() {
@@ -30,8 +30,8 @@ class Router {
       debug('handler found for %s', method);
 
       return yield route.call(this);
-    }
-  };
+    };
+  }
 }
 
 module.exports = Router;

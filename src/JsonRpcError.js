@@ -10,6 +10,19 @@ class JsonRpcError extends Error {
     this.code = code;
     this.data = data;
   }
+
+  toJSON() {
+    const result = {
+      message: this.message,
+      code: this.code,
+    };
+
+    if (this.data) {
+      result.data = this.data;
+    }
+
+    return result;
+  }
 }
 
 module.exports = JsonRpcError;

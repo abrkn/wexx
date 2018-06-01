@@ -4,14 +4,13 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "DEBUG=*,-babel tape 'test/*'",
+    "test": "DEBUG=wexx* jest",
     "install": "[ -d .git ] || babel src -d src --ignore node_modules"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "async": "2.6.0",
     "babel-cli": "6.26.0",
     "babel-plugin-transform-builtin-extend": "1.1.2",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
@@ -20,12 +19,12 @@
     "bluebird": "3.5.1",
     "composition": "2.3.0",
     "debug": "3.1.0",
+    "jest": "23.1.0",
     "universal-websocket-client": "1.0.1",
     "ws": "4.1.0"
   },
   "devDependencies": {
-    "tape": "4.5.1",
-    "tape-promise": "1.0.1"
+    "find-free-port": "1.2.0"
   },
   "babel": {
     "presets": [
@@ -35,5 +34,8 @@
     "plugins": [
       "transform-object-rest-spread"
     ]
+  },
+  "jest": {
+    "verbose": true
   }
 }

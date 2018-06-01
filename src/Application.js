@@ -1,12 +1,11 @@
+import Socket from './Socket';
 const { EventEmitter } = require('events');
 const createDebugger = require('debug');
 const compose = require('composition');
-const async = require('async');
 const assert = require('assert');
-const Client = require('./Client');
 const Context = require('./Context');
 const { inspect } = require('util');
-const JsonRpcError = require('../JsonRpcError');
+const JsonRpcError = require('./JsonRpcError');
 const { pick } = require('lodash');
 
 const debug = createDebugger('wexx:server');
@@ -90,7 +89,7 @@ class Application extends EventEmitter {
     });
   }
 
-  onClientMessage(client, message) {
+  onClientRequest(client, message) {
     const context = new Context({
       client,
       message,
@@ -121,10 +120,10 @@ class Application extends EventEmitter {
   accept(socket) {
     debug('accepting client');
 
-    const client = new Client(socket);
+    const client = new Socket(socket);
     client.id = ++this.clientCounter;
     this.clients.push(client);
-    client.on('message', this.onClientMessage.bind(this, client));
+    client.on('request', this.onClientRequest.bind(this, client));
     client.on('close', this.onClientClose.bind(this, client));
 
     this.emit('accept', client);

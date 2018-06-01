@@ -3,4 +3,4 @@ try {
   require('babel-polyfill');
 } catch (error) {}
 
-module.exports = require('./src/Client/index');
+module.exports = require('./src/Socket');

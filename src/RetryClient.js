@@ -1,4 +1,4 @@
-const Client = require('./index');
+import Socket from './Socket';
 const { EventEmitter } = require('events');
 const createDebugger = require('debug');
 
@@ -30,7 +30,7 @@ class RetryClient extends EventEmitter {
 
     this.state = STATES.CONNECTING;
 
-    Client.connect(this.endpoint, this.options)
+    Socket.connect(this.endpoint, this.options)
       .then(client => {
         debug('open!');
 
@@ -100,4 +100,4 @@ class RetryClient extends EventEmitter {
   }
 }
 
-module.exports = RetryClient;
+export default RetryClient;
