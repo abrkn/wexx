@@ -25,12 +25,17 @@ class Application extends EventEmitter {
     composed
       .call(context)
       .then(null, async error => {
-        debug(`error from middleware:\n${error.stack}`);
         assert(context.respond !== false);
         assert(context.result === undefined);
         assert(context.error === undefined);
 
         if (!(error instanceof JsonRpcError)) {
+          console.error('Unhandled error when handling request');
+          console.error('Message:');
+          console.error(context.message);
+          console.error('Error:');
+          console.error(error.stack);
+
           if (process.env.NODE_ENV === 'production') {
             error = new JsonRpcError('Internal server error', {
               code: 'InternalServerError',

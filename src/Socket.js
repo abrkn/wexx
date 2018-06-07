@@ -9,34 +9,6 @@ const debug = createDebug('wexx:Socket');
 
 const MAX_INSPECT_LENGTH = 250;
 
-export function monitorHeartbeat(ws) {
-  const noop = () => {};
-  let alive = true;
-
-  const interval = setInterval(() => {
-    if (!alive) {
-      if (ws.terminate) {
-        ws.terminate();
-      } else {
-        ws.close();
-      }
-
-      clearInterval(interval);
-      return;
-    }
-
-    alive = false;
-
-    if (ws.ping) {
-      ws.ping(noop);
-    } else {
-      ws.send(JSON.stringify({ id: null, method: 'ping' }));
-    }
-  }, 30e3);
-
-  return () => clearInterval(interval);
-}
-
 class JsonRpcSocket extends EventEmitter {
   constructor(socket) {
     super();
@@ -49,8 +21,6 @@ class JsonRpcSocket extends EventEmitter {
 
     this.requestCounter = 0;
     this.requests = {};
-
-    this.stopMonitor = monitorHeartbeat(socket);
   }
 
   failAllRequestsWithError(error) {
@@ -63,7 +33,6 @@ class JsonRpcSocket extends EventEmitter {
       new Error('Connection closed during request')
     );
 
-    this.stopMonitor();
     this.emit('close', ...args);
   }
 
@@ -175,6 +144,13 @@ class JsonRpcSocket extends EventEmitter {
     if (!id && method !== undefined) {
       assert(error === undefined);
       assert(result === undefined);
+
+      // Reply to ping
+      if (method === 'ping') {
+        this.send({
+          method: 'pong',
+        }).catch(error => console.warn(`Failed to pong: ${error.message}`));
+      }
 
       this.emit('notify', { method, params });
       return;
