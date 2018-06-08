@@ -1,5 +1,6 @@
-const compose = require('composition');
+const assert = require('assert');
 const createDebugger = require('debug');
+const runMiddleware = require('./runMiddleware').default;
 
 const debug = createDebugger('wexx:Router');
 
@@ -8,28 +9,29 @@ class Router {
     this.methods = {};
   }
 
-  add(method, ...fn) {
-    this.methods[method] = compose(fn);
+  add(method, ...fns) {
+    this.methods[method] = fns;
     return this;
   }
 
   routes() {
     const router = this;
 
-    return function* dispatch(next) {
-      const { method } = this.message;
+    return function dispatch(req, res, next) {
+      assert(req);
+      assert(res);
+
+      const { method } = req;
       const route = router.methods[method];
 
       debug('routing %s', method);
 
       if (!route) {
         debug('no handler found for %s', method);
-        return next;
+        return next();
       }
 
-      debug('handler found for %s', method);
-
-      return yield route.call(this);
+      runMiddleware(route, req, res, next);
     };
   }
 }
