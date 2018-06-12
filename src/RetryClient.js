@@ -2,7 +2,7 @@ import Socket from './Socket';
 const { EventEmitter } = require('events');
 const createDebugger = require('debug');
 
-const STATES = {
+export const STATES = {
   WAITING: 'WAITING',
   CONNECTING: 'CONNECTING',
   OPEN: 'OPEN',
@@ -30,7 +30,12 @@ class RetryClient extends EventEmitter {
 
     this.state = STATES.CONNECTING;
 
-    Socket.connect(this.endpoint, this.options)
+    debug('with options', this.options);
+
+    Socket.connect(
+      this.endpoint,
+      this.options
+    )
       .then(client => {
         debug('open!');
 

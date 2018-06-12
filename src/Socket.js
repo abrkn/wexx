@@ -4,6 +4,7 @@ import { inspect } from 'util';
 import { has } from 'lodash';
 import createDebug from 'debug';
 import JsonRpcError from './JsonRpcError';
+import WebSocket from 'universal-websocket-client';
 
 const debug = createDebug('wexx:Socket');
 
@@ -167,7 +168,7 @@ class JsonRpcSocket extends EventEmitter {
         data: error.data,
       });
 
-      this.emit('error', wrappedError);
+      this.emit('clientError', wrappedError);
       return;
     }
 
@@ -232,6 +233,8 @@ JsonRpcSocket.connect = async (endpoint, options = {}) => {
   return await new Promise((resolve, reject) => {
     debug(`Connecting to ${endpoint}...`);
 
+    debug('With options', options.ws);
+
     const ws = new WebSocket(endpoint, options.ws);
 
     const onOpen = () => {
@@ -248,7 +251,7 @@ JsonRpcSocket.connect = async (endpoint, options = {}) => {
     };
 
     const onError = error => {
-      debug(`Connect failed: ${error.message}`);
+      debug(`Connect failfed: ${error.message}`);
       reject(error);
       removeListeners();
     };
