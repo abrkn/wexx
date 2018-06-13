@@ -11,8 +11,10 @@ const debug = createDebug('wexx:Socket');
 const MAX_INSPECT_LENGTH = 250;
 
 class JsonRpcSocket extends EventEmitter {
-  constructor(socket) {
+  constructor(socket, options = {}) {
     super();
+
+    this.user = options.user;
 
     this.socket = socket;
     this.socket.addEventListener('message', this.onSocketMessage.bind(this));

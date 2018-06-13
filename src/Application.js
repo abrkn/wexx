@@ -91,10 +91,10 @@ class Application extends EventEmitter {
   }
 
   // TODO: Extract into a listener
-  accept(socket) {
-    debug('accepting client');
+  accept(socket, req) {
+    const { user } = req;
+    const client = new Socket(socket, { user });
 
-    const client = new Socket(socket);
     client.id = ++this.clientCounter;
     this.clients.push(client);
     client.on('request', this.onClientRequest.bind(this, client));
