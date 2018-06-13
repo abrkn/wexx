@@ -68,7 +68,7 @@ class Application extends EventEmitter {
 
     res.unhandled = () =>
       res.error(
-        new JsonRpcError('Unhanled request', { code: 'UnhandledRequest' })
+        new JsonRpcError('Unhandled request', { code: 'UnhandledRequest' })
       );
 
     runMiddleware([...this.middleware.slice(), res.unhandled], req, res);
