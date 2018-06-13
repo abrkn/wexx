@@ -47,6 +47,7 @@ class Application extends EventEmitter {
         console.error(req.message);
         console.error('Error:');
         console.error(error.stack);
+        console.error(`Type of error: ${error.constructor.name}`);
 
         if (process.env.NODE_ENV === 'production') {
           error = new JsonRpcError('Internal server error', {
