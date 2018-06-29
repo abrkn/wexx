@@ -9,6 +9,7 @@ import WebSocket from 'universal-websocket-client';
 const debug = createDebug('wexx:Socket');
 
 const MAX_INSPECT_LENGTH = 250;
+const PING_INTERVAL = 30e3;
 
 class JsonRpcSocket extends EventEmitter {
   constructor(socket, options = {}) {
@@ -22,8 +23,23 @@ class JsonRpcSocket extends EventEmitter {
     this.socket.addEventListener('close', this.onSocketClose.bind(this));
     this.close = this.socket.close.bind(socket);
 
+    this.pingTimer = setTimeout(() => this.ping(), PING_INTERVAL);
+
     this.requestCounter = 0;
     this.requests = {};
+  }
+
+  ping() {
+    if (this.socket.readyState !== WebSocket.OPEN) {
+      return;
+    }
+
+    this.send({
+      id: null,
+      method: 'ping',
+    }).catch(error => console.warn(`Failed to ping: ${error.message}`));
+
+    this.pingTimer = setTimeout(() => this.ping(), PING_INTERVAL);
   }
 
   failAllRequestsWithError(error) {
@@ -151,6 +167,7 @@ class JsonRpcSocket extends EventEmitter {
       // Reply to ping
       if (method === 'ping') {
         this.send({
+          id: null,
           method: 'pong',
         }).catch(error => console.warn(`Failed to pong: ${error.message}`));
       }
