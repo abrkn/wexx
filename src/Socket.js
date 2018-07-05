@@ -149,11 +149,12 @@ class JsonRpcSocket extends EventEmitter {
         return;
       }
 
-      const { reject } = handler;
+      const { reject, message: request } = handler;
 
       const wrappedError = new JsonRpcError(error.message, {
         code: error.code,
         data: error.data,
+        request,
       });
       reject(wrappedError);
       return;
@@ -235,7 +236,7 @@ class JsonRpcSocket extends EventEmitter {
     }
 
     const promise = new Promise((resolve, reject) => {
-      this.requests[id] = { resolve, reject };
+      this.requests[id] = { resolve, reject, message };
     });
 
     this.send(message);

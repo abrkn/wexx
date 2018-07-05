@@ -5,10 +5,11 @@ class JsonRpcError extends Error {
     this.constructor = JsonRpcError;
     this.__proto__ = JsonRpcError.prototype;
 
-    const { code = -32000, data } = options;
+    const { code = -32000, data, request } = options;
 
     this.code = code;
     this.data = data;
+    this.request = request;
   }
 
   toJSON() {
@@ -19,6 +20,10 @@ class JsonRpcError extends Error {
 
     if (this.data) {
       result.data = this.data;
+    }
+
+    if (this.request) {
+      result.request = this.request;
     }
 
     return result;
