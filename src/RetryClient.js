@@ -16,6 +16,7 @@ class RetryClient extends EventEmitter {
     super();
     this.options = options;
     this.state = STATES.CLOSED;
+    this.connected = false;
     this.endpoint = endpoint;
     this.onClientClose = this.onClientClose.bind(this);
     this.connect();
@@ -40,6 +41,7 @@ class RetryClient extends EventEmitter {
         debug('open!');
 
         this.state = STATES.OPEN;
+        this.connected = true;
 
         client.on('close', this.onClientClose);
 
@@ -56,6 +58,7 @@ class RetryClient extends EventEmitter {
         debug(`failed to connect: ${error.message}`);
         this.emit('connectError', error);
         this.state = 'CLOSED';
+        this.connected = false;
         this.retry();
       });
   }
@@ -85,6 +88,7 @@ class RetryClient extends EventEmitter {
       debug('connection closed');
     }
     this.state = 'CLOSED';
+    this.connected = false;
     this.retry();
   }
 
