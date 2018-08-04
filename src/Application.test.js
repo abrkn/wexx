@@ -38,7 +38,7 @@ describe('Application', () => {
 
     app.use(router.routes());
 
-    app.accept(incoming.socket);
+    app.accept(incoming.socket, { user: null });
 
     const result = await outgoing.request('add', [1, 2, 3]);
     expect(result).toBe(6);
