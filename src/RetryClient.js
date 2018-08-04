@@ -16,10 +16,13 @@ class RetryClient extends EventEmitter {
     super();
     this.options = options;
     this.state = STATES.CLOSED;
-    this.connected = false;
     this.endpoint = endpoint;
     this.onClientClose = this.onClientClose.bind(this);
     this.connect();
+  }
+
+  get connected() {
+    return this.state === STATES.OPEN;
   }
 
   connect() {
@@ -41,9 +44,9 @@ class RetryClient extends EventEmitter {
         debug('open!');
 
         this.state = STATES.OPEN;
-        this.connected = true;
 
         client.on('close', this.onClientClose);
+        client.on('error', this.onClientError);
 
         const proxyEvents = ['notify'];
 
@@ -58,7 +61,6 @@ class RetryClient extends EventEmitter {
         debug(`failed to connect: ${error.message}`);
         this.emit('connectError', error);
         this.state = 'CLOSED';
-        this.connected = false;
         this.retry();
       });
   }
@@ -75,7 +77,7 @@ class RetryClient extends EventEmitter {
     debug(`retrying connection in ${interval / 1e3}s...`);
 
     this.timer = setTimeout(() => {
-      this.state = 'CLOSED';
+      this.state = STATES.CLOSED;
       this.connect();
     }, interval);
   }
@@ -87,13 +89,19 @@ class RetryClient extends EventEmitter {
     } else {
       debug('connection closed');
     }
-    this.state = 'CLOSED';
-    this.connected = false;
+    this.state = STATES.CLOSED;
+    this.retry();
+  }
+
+  onClientError(error) {
+    debug(`connection error: ${error.message}`);
+    this.emit('error', error);
+    this.state = STATES.CLOSED;
     this.retry();
   }
 
   async request(...rest) {
-    if (this.state !== 'OPEN') {
+    if (!this.connected) {
       throw new Error('Not connected');
     }
 
@@ -101,7 +109,7 @@ class RetryClient extends EventEmitter {
   }
 
   async notify(...rest) {
-    if (this.state !== 'OPEN') {
+    if (!this.connected) {
       throw new Error('Not connected');
     }
 

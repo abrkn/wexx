@@ -19,27 +19,28 @@ class JsonRpcSocket extends EventEmitter {
 
     this.socket = socket;
     this.socket.addEventListener('message', this.onSocketMessage.bind(this));
-    this.socket.addEventListener('error', this.emit.bind(this, 'error'));
+    this.socket.addEventListener('error', this.onSocketError.bind(this));
     this.socket.addEventListener('close', this.onSocketClose.bind(this));
-    this.close = this.socket.close.bind(socket);
 
-    this.pingTimer = setTimeout(() => this.ping(), PING_INTERVAL);
+    this.ping = this.ping.bind(this);
+
+    this.pingTimer = setTimeout(this.ping, PING_INTERVAL);
+    this.pingTimer.unref();
 
     this.requestCounter = 0;
     this.requests = {};
   }
 
   ping() {
-    if (this.socket.readyState !== WebSocket.OPEN) {
-      return;
-    }
-
     this.send({
       id: null,
       method: 'ping',
-    }).catch(error => console.warn(`Failed to ping: ${error.message}`));
-
-    this.pingTimer = setTimeout(() => this.ping(), PING_INTERVAL);
+    })
+      .then(() => {
+        this.pingTimer = setTimeout(this.ping, PING_INTERVAL);
+        this.pingTimer.unref();
+      })
+      .catch(error => console.warn(`Failed to ping: ${error.message}`));
   }
 
   failAllRequestsWithError(error) {
@@ -47,12 +48,36 @@ class JsonRpcSocket extends EventEmitter {
     this.requests = {};
   }
 
+  close() {
+    this.socket.close();
+  }
+
+  get connected() {
+    return this.readyState === WebSocket.OPEN;
+  }
+
+  get readyState() {
+    return this.socket.readyState;
+  }
+
   onSocketClose(...args) {
     this.failAllRequestsWithError(
       new Error('Connection closed during request')
     );
 
+    clearTimeout(this.pingTimer);
+
     this.emit('close', ...args);
+  }
+
+  onSocketError(...args) {
+    clearTimeout(this.pingTimer);
+
+    this.failAllRequestsWithError(
+      new Error('Connection errored during request')
+    );
+
+    this.emit('error', ...args);
   }
 
   onSocketMessage(event) {
