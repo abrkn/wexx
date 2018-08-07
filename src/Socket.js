@@ -264,7 +264,7 @@ class JsonRpcSocket extends EventEmitter {
       this.requests[id] = { resolve, reject, message };
     });
 
-    this.send(message);
+    await this.send(message);
 
     return promise;
   }
